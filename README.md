@@ -1,11 +1,26 @@
 # Ashen Echoes Horror Experience
 
-This repository contains drop-in LuaU scripts that build a complete Roblox horror game called **Ashen Echoes**. The experience features a procedurally constructed geothermal facility, an objective-driven progression loop, and two distinct enemy archetypes (a stalking **Wraith** and an ambushing **Crawler**).
+This repository contains drop-in LuaU scripts that power a complete Roblox horror game called **Ashen Echoes**. You handcraft the geothermal facility in Studio; the scripts wire up interactions, UI, objectives, and the stalking/ambushing enemies that patrol it.
 
 ## TL;DR build steps
 
-1. Create a new **Roblox Studio** place (R6 or R15 supported) and open **Explorer** + **Properties** panels.
-2. Mirror the folder structure from [`Roblox/`](./Roblox) inside your place:
+1. Create a new **Roblox Studio** place (R6 or R15 supported) and open the **Explorer** + **Properties** panels.
+2. Hand-build the environment and required gameplay anchors:
+   - Insert a `Model` named **`AshenEchoesMap`** under `Workspace`.
+   - Inside it create the following folders (names can be changed in [`Config.lua`](./Roblox/ReplicatedStorage/Config.lua)) and populate them with your parts/models:
+
+     | Folder | Required contents |
+     | --- | --- |
+     | `Doors` | One `Model` per usable door. Set the model `PrimaryPart` (or add a `Door` part) at the hinge. Optional: add a `Number` attribute `OpenAngle` (degrees) for the swing amount. |
+     | `Fuses` | One `Model` or `Part` per collectible fuse. The scripts add prompts automatically. |
+     | `HidingSpots` | One locker/closet `Model` per hiding spot. Ensure a `PrimaryPart` exists (the scripts will use it for teleporting players). |
+     | `Switches` | Any wall consoles, breakers, or levers that should trigger the atmospheric cue. |
+     | `PatrolNodes` | Drop `Part` markers where you want the Wraith to patrol. Only the positions are used, so you can make them invisible. |
+     | `CrawlerNests` | Place `Part` markers where the Crawler should emerge from (vents, floor grates, etc.). |
+     | `Spawns` | Place `Part` markers named for spawns (must include one called `WraithSpawn`). |
+
+   - Add a generator model named **`GeneratorConsole`** somewhere inside `AshenEchoesMap`. If it contains a part named `Core`, the fuse deposit prompt will appear on it; otherwise the model’s `PrimaryPart` is used.
+3. Mirror the folder structure from [`Roblox/`](./Roblox) inside your place:
 
    | Roblox service | In-studio location | File to paste |
    | --- | --- | --- |
@@ -18,30 +33,27 @@ This repository contains drop-in LuaU scripts that build a complete Roblox horro
    | `ServerScriptService/Main` | `ServerScriptService/Main/EnemyController` | [`Roblox/ServerScriptService/EnemyController.lua`](./Roblox/ServerScriptService/EnemyController.lua) (ModuleScript) |
    | `StarterPlayer` | `StarterPlayer/StarterPlayerScripts/ClientMain` | [`Roblox/StarterPlayer/StarterPlayerScripts/ClientMain.client.lua`](./Roblox/StarterPlayer/StarterPlayerScripts/ClientMain.client.lua) (LocalScript) |
 
-   > **Tip:** In Explorer, create the folders first (e.g. `Main` under `ServerScriptService`) then insert the correct Script/ModuleScript and paste the file contents.
+   > **Tip:** Create the folders first (e.g. `Main` under `ServerScriptService`) then insert the correct Script/ModuleScript and paste the file contents.
 
-3. Press **Play**. The scripts automatically:
-   - build the entire facility (five rooms, props, lighting, and hiding lockers),
-   - spawn interactable doors, fuses, generator, and switches,
-   - create polished health/stamina HUD, inventory display, and dynamic objective callouts,
-   - spawn the Wraith stalker and Crawler ambusher with independent AI loops.
-
-No manual part placement is required; everything is generated and wired up when the server starts.
+4. Press **Play**. The scripts automatically:
+   - attach polished health/stamina HUD, inventory display, and dynamic objective callouts,
+   - hook your door/fuse/switch/locker assets with interaction prompts,
+   - spawn the Wraith stalker and Crawler ambusher using your patrol nodes and nests.
 
 ## Feature overview
 
-- **Dynamic facility layout** – Each run assembles rooms, patrol nodes, light sources, props, and ambiance strictly through LuaU.
+- **Hand-authored facility, scripted tension** – You control the architecture and props; the code animates the atmosphere, audio cues, and interactions.
 - **Objectives** – Collect and install three fuses to power the generator and unlock the atrium lift. Objective text and inventory counters replicate to every player.
 - **Interactive world** – Hinged doors, flicker switch, fuses, generator console, and fully functional hiding lockers.
 - **Two enemy behaviors**:
-  - **Wraith** stalks patrol points, uses line-of-sight detection, then sprints and claws players.
-  - **Crawler** lurks at vents, detects sound, then executes leap ambushes with cooldown-driven retreats.
+  - **Wraith** stalks your patrol points, uses line-of-sight detection, then sprints and claws players.
+  - **Crawler** lurks near its nests, detects sound, then executes leap ambushes with cooldown-driven retreats.
 - **Player systems** – Sprinting stamina, flashlight toggle, damage feedback, hiding state, atmospheric tints, and ambient cues.
-- **Atmosphere** – Lighting, fog, particles, soundscapes, UI styling, and screen-space effects craft a tense pacing arc.
+- **Atmosphere** – Lighting tweaks, fog, particles, soundscapes, UI styling, and screen-space effects craft a tense pacing arc.
 
 ## Optional customization
 
-- Edit [`Config.lua`](./Roblox/ReplicatedStorage/Config.lua) to adjust room positions, lighting colors, patrol points, enemy tuning, and player movement.
-- Add more rooms or fuses by duplicating entries in the configuration arrays; the builder consumes them automatically.
+- Edit [`Config.lua`](./Roblox/ReplicatedStorage/Config.lua) to rename folders/objects the scripts look for, or to tweak enemy/player tuning.
+- Duplicate or remove patrol nodes/nests/fuses in your map to rebalance pacing and difficulty.
 
 Enjoy scaring your players!

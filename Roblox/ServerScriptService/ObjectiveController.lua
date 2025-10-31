@@ -31,19 +31,29 @@ local function updateInventory(player)
 end
 
 local function handleExitUnlock()
-    local exitDoor = assets.Doors[config.Objectives.ExitDoorName]
-    if not exitDoor then
+    local doorEntry = assets.Doors[config.Objectives.ExitDoorName]
+    if not doorEntry or not doorEntry.DoorPart then
         return
     end
 
     state.Completed = true
     updateObjectiveText()
 
-    local doorPart = exitDoor:FindFirstChild("Door")
-    if doorPart then
-        local openCFrame = doorPart.CFrame * CFrame.Angles(0, math.rad(90), 0)
-        local tween = TweenService:Create(doorPart, TweenInfo.new(0.6, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {CFrame = openCFrame})
-        tween:Play()
+    local doorPart = doorEntry.DoorPart
+    local openCFrame = doorEntry.OpenCFrame or (doorPart.CFrame * CFrame.Angles(0, math.rad(90), 0))
+    local tween = TweenService:Create(doorPart, TweenInfo.new(0.6, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
+        CFrame = openCFrame,
+    })
+    tween.Completed:Connect(function()
+        doorPart.CanCollide = false
+    end)
+    tween:Play()
+
+    if doorEntry.StateValue then
+        doorEntry.StateValue.Value = true
+    end
+    if doorEntry.Prompt then
+        doorEntry.Prompt.Enabled = false
     end
 
     EventsModule.ScreenTint:FireAllClients(Color3.fromRGB(255, 150, 100))

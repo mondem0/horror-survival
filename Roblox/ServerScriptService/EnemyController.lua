@@ -279,17 +279,25 @@ function EnemyController.Init(configModule, mapAssets, playerModule)
     assets = mapAssets
     playerService = playerModule
 
-    local wraithSpawn = configModule.Map.Rooms[1].Position
-    for _, room in ipairs(configModule.Map.Rooms) do
-        if room.Name == configModule.Enemies.Wraith.SpawnRoom then
-            wraithSpawn = room.Position
-        end
+    local wraithSpawn = assets.Spawns and (assets.Spawns.Wraith or assets.Spawns[configModule.Map.WraithSpawnName])
+    if not wraithSpawn then
+        warn("[AshenEchoes] Wraith spawn point missing; defaulting to origin.")
+        wraithSpawn = Vector3.new(0, 0, 0)
     end
 
     spawnEnemy("Wraith", wraithSpawn)
 
-    for _, nest in ipairs(assets.CrawlerNests) do
-        spawnEnemy("Crawler", nest.Position)
+    if assets.CrawlerNests and #assets.CrawlerNests > 0 then
+        for _, nest in ipairs(assets.CrawlerNests) do
+            spawnEnemy("Crawler", nest.Position)
+        end
+    else
+        warn("[AshenEchoes] No crawler nests found; spawning a crawler near the Wraith.")
+        spawnEnemy("Crawler", wraithSpawn + Vector3.new(15, 0, 0))
+    end
+
+    if not assets.PatrolPoints or #assets.PatrolPoints == 0 then
+        assets.PatrolPoints = {wraithSpawn}
     end
 
     RunService.Heartbeat:Connect(function(deltaTime)
